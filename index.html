@@ -120,6 +120,50 @@
   .rubric{display:grid;grid-template-columns:1fr 220px;gap:16px}
   .rubric table{border:1px solid var(--line)}
   @media (max-width:720px){.rubric{grid-template-columns:1fr}}
+  /* done steps */
+  .done-head h2{margin-bottom:6px}
+  .warn-line{margin:0;background:var(--warn-soft);color:#7a3417;border-radius:10px;padding:10px 14px}
+  .step{display:flex;gap:16px;padding:20px 22px}
+  .step-badge{flex:none;width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;font-weight:900;font-size:18px;display:grid;place-items:center}
+  .step-body{flex:1;min-width:0}
+  .step-body h3{margin:6px 0 12px;font-size:17px}
+  .step-row{display:flex;gap:18px;align-items:flex-start}
+  .step-text{flex:1;min-width:0}
+  .step-text p{margin:0 0 10px}
+  .illu{position:relative;flex:none;width:230px;height:150px;background:#f3f1ea;border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;justify-content:center;overflow:hidden}
+  .m-code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#fff;border:1.5px dashed #bfb9aa;border-radius:8px;padding:6px 10px;width:100%}
+  .m-btn{background:var(--accent);color:#fff;font-weight:700;font-size:13px;border-radius:8px;padding:8px 14px}
+  .m-btn.purple{background:#673ab7;align-self:flex-start;margin-top:-18px}
+  .m-cursor{position:absolute;width:26px;height:26px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+  .m-toast{position:absolute;right:12px;bottom:12px;background:#1d2433;color:#fff;font-size:12px;font-weight:700;border-radius:99px;padding:4px 10px}
+  .m-tabs{display:flex;gap:4px;width:100%;margin-top:-6px}
+  .m-tab{font-size:11px;background:#e4e0d6;border-radius:6px 6px 0 0;padding:4px 8px;color:var(--muted)}
+  .m-tab.new{background:#fff;color:var(--ink);font-weight:700;box-shadow:0 0 0 2px var(--accent) inset}
+  .m-link{background:#2b5fb4;color:#fff;font-weight:700;font-size:13px;border-radius:8px;padding:9px 14px}
+  .illu.form{gap:7px;justify-content:flex-start;padding:14px;height:auto;min-height:150px;overflow:visible}
+  .m-field{width:100%;background:#fff;border-radius:8px;padding:5px 10px;font-size:11px;position:relative;border-left:4px solid #673ab7}
+  .m-field span{display:block;font-weight:700;color:var(--ink)}
+  .m-field i{display:block;font-style:normal;color:var(--muted);border-bottom:1px solid #ddd;font-size:11px}
+  .m-field.hl{box-shadow:0 0 0 2px #f2a33a}
+  .m-field i.paste{color:#1d2433;font-family:ui-monospace,Menlo,monospace;background:#fff4dd}
+  .m-tip{position:absolute;right:6px;top:-9px;background:#f2a33a;color:#fff;font-size:10px;border-radius:99px;padding:1px 8px}
+  .m-done{position:absolute;left:16px;right:16px;bottom:14px;background:#fff;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:700;color:#14513f;border-top:4px solid #673ab7}
+  .submit-link{display:inline-block;text-decoration:none;background:#2b5fb4;font-size:17px;padding:14px 22px}
+  .submit-link:hover{opacity:.92}
+  .keys{display:grid;gap:8px;background:#faf9f5;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .keys .k{display:inline-block;min-width:78px;font-weight:700}
+  kbd{display:inline-block;min-width:30px;text-align:center;background:#fff;border:1px solid #cfc9bb;border-bottom-width:3px;border-radius:6px;padding:1px 7px;font-family:inherit;font-weight:700;font-size:14px}
+  .mono{font-family:ui-monospace,Menlo,monospace}
+  @media (max-width:640px){.step-row{flex-direction:column}.illu{width:100%}.step{padding:16px}.step-badge{width:32px;height:32px;font-size:16px}}
+  .send-box{text-align:center;padding:28px 22px}
+  .send-box .send-icon{font-size:42px;line-height:1}
+  .send-box h2{font-size:22px;margin:10px 0 6px}
+  .send-box.ok{background:#eaf6ef;border-color:#bfe0cc}
+  .send-box.fail{background:var(--warn-soft);border-color:#efc9b5}
+  details#backup{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px}
+  details#backup>summary{cursor:pointer;font-weight:700;color:var(--muted)}
+  details#backup[open]>summary{color:var(--ink)}
+  details#backup .card{border-color:#ebe7dd;box-shadow:none}
   .hidden{display:none !important}
 </style>
 </head>
@@ -156,20 +200,109 @@
 
     <!-- step 3: done -->
     <section id="stepDone" class="hidden">
-      <div class="card">
-        <h2>✅ 답안 작성이 끝났어요</h2>
-        <p style="margin-top:-4px">아래 <b>제출 코드</b>를 복사해서 선생님께 보내야 제출이 완료됩니다. (학급 단톡방, 메시지 등 선생님이 안내한 곳으로)</p>
-        <div class="code-box" id="codeBox"></div>
-        <div class="row" style="margin-top:14px;align-items:center">
-          <button class="btn" id="btnCopy">코드 복사하기</button>
-          <span class="small" id="copyMsg"></span>
-        </div>
-        <p class="small muted" style="margin-top:16px">복사 버튼이 안 되면 코드 상자를 길게 누르거나 클릭해 전체 선택한 뒤 복사하세요. 코드가 한 글자라도 빠지면 채점되지 않아요.</p>
+      <div class="card send-box" id="sendBox">
+        <div class="send-icon" id="sendIcon">⏳</div>
+        <h2 id="sendTitle">제출하는 중이에요…</h2>
+        <p id="sendMsg" style="margin:0">잠시만 기다려 주세요. 화면을 닫지 마세요.</p>
+        <p class="small muted" style="margin:10px 0 0" id="whoDone"></p>
+        <button class="btn hidden" id="btnResend" style="margin-top:14px">다시 보내기</button>
       </div>
-      <div class="card">
-        <h2 style="font-size:16px">내 답안 확인</h2>
-        <div id="myAnswers" class="small"></div>
-        <button class="btn plain" id="btnReset" style="margin-top:14px">처음부터 다시 (다른 학생)</button>
+
+      <details id="backup">
+        <summary>자동 제출이 안 될 때: 직접 제출하는 방법</summary>
+        <p class="small muted" style="margin:10px 0 14px">선생님이 “제출이 안 들어왔다”고 하거나 위에 실패 안내가 나오면 아래 순서대로 하세요.</p>
+
+      <!-- STEP 1 -->
+      <div class="card step">
+        <div class="step-badge">1</div>
+        <div class="step-body">
+          <h3>제출 코드 복사하기</h3>
+          <div class="step-row">
+            <div class="illu" aria-hidden="true">
+              <div class="m-code">QZ2.Mzn4Cxr…</div>
+              <div class="m-btn">코드 복사하기</div>
+              <svg class="m-cursor" style="left:58%;top:62%" viewBox="0 0 24 24"><path d="M4 2l15 10-7 1.5L9 21z" fill="#1d2433" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              <div class="m-toast">복사됨 ✓</div>
+            </div>
+            <div class="step-text">
+              <p>초록색 <b>[코드 복사하기]</b> 버튼을 누르세요. “복사됐어요!”가 나오면 성공이에요.</p>
+              <div class="code-box" id="codeBox"></div>
+              <div class="row" style="margin-top:12px;align-items:center">
+                <button class="btn" id="btnCopy">코드 복사하기</button>
+                <span class="small" id="copyMsg"></span>
+              </div>
+              <p class="small muted" style="margin:10px 0 0">버튼이 안 되면 코드 상자를 클릭(휴대폰은 길게 누르기)해서 전체 선택한 뒤 복사하세요.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="card step">
+        <div class="step-badge">2</div>
+        <div class="step-body">
+          <h3>결과 제출 링크 누르기</h3>
+          <div class="step-row">
+            <div class="illu" aria-hidden="true">
+              <div class="m-tabs"><span class="m-tab">시험 화면</span><span class="m-tab new">결과 제출 ＋</span></div>
+              <div class="m-link">📝 결과 제출하러 가기 ↗</div>
+              <svg class="m-cursor" style="left:64%;top:66%" viewBox="0 0 24 24"><path d="M4 2l15 10-7 1.5L9 21z" fill="#1d2433" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="step-text">
+              <p>아래 버튼을 누르면 <b>새 탭</b>에서 제출용 구글 설문지가 열려요. 이 시험 화면은 닫지 말고 그대로 두세요.</p>
+              <a class="btn submit-link" id="submitLink" href="https://forms.gle/89cpSM971fsGSYMDA" target="_blank" rel="noopener noreferrer">📝 결과 제출하러 가기 ↗</a>
+              <p class="small muted" style="margin:10px 0 0">링크가 안 열리면 주소를 직접 입력하세요: <span class="mono">forms.gle/89cpSM971fsGSYMDA</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="card step">
+        <div class="step-badge">3</div>
+        <div class="step-body">
+          <h3>설문지에 학번·이름 쓰고, 제출코드 칸에 붙여넣기</h3>
+          <div class="step-row">
+            <div class="illu form" aria-hidden="true">
+              <div class="m-field"><span>학번</span><i>20304</i></div>
+              <div class="m-field"><span>이름</span><i>홍길동</i></div>
+              <div class="m-field hl"><span>제출코드</span><i class="paste">QZ2.Mzn4CxrYkyws8wt…</i><b class="m-tip">여기에 붙여넣기!</b></div>
+            </div>
+            <div class="step-text">
+              <p><b>제출코드</b> 칸을 한 번 누른 다음 붙여넣기 하세요.</p>
+              <div class="keys">
+                <div><span class="k">💻 컴퓨터</span> <kbd>Ctrl</kbd> + <kbd>V</kbd></div>
+                <div><span class="k">📱 휴대폰</span> 칸을 <b>길게 누르기</b> → <b>붙여넣기</b></div>
+              </div>
+              <p class="small muted" style="margin:10px 0 0">코드는 직접 타이핑하지 말고 꼭 붙여넣기 하세요. 한 글자라도 틀리면 채점되지 않아요.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="card step">
+        <div class="step-badge">4</div>
+        <div class="step-body">
+          <h3>[제출] 버튼 누르기</h3>
+          <div class="step-row">
+            <div class="illu" aria-hidden="true">
+              <div class="m-btn purple">제출</div>
+              <svg class="m-cursor" style="left:56%;top:44%" viewBox="0 0 24 24"><path d="M4 2l15 10-7 1.5L9 21z" fill="#1d2433" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              <div class="m-done">✔ 응답이 기록되었습니다</div>
+            </div>
+            <div class="step-text">
+              <p>설문지 맨 아래 <b>[제출]</b>을 누르고, <b>“응답이 기록되었습니다”</b>가 보이면 제출 완료예요. 🎉</p>
+              <p class="small muted" style="margin:10px 0 0">제출을 마친 뒤에만 이 화면을 닫으세요.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      </details>
+
+      <div style="text-align:right;margin-top:16px">
+        <button class="btn plain" id="btnReset">처음부터 다시 (다른 학생)</button>
       </div>
     </section>
   </div>
@@ -240,13 +373,24 @@ function b64urlDecode(s){
   return new TextDecoder().decode(bytes);
 }
 function fnv(str){ let h=0x811c9dc5; for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,0x01000193)>>>0; } return h.toString(36); }
-function makeCode(payload){ const p = b64urlEncode(JSON.stringify(payload)); return "QZ1." + p + "." + fnv(QUIZ.id + p); }
+function scramble(bytes){
+  const k = new TextEncoder().encode(QUIZ.id + "#qz");
+  return bytes.map((b,i)=> b ^ k[i % k.length] ^ ((i*73 + 41) & 255));
+}
+function bytesToB64url(bytes){ let bin=""; bytes.forEach(b=>bin+=String.fromCharCode(b)); return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+function b64urlToBytes(s){ s=s.replace(/-/g,"+").replace(/_/g,"/"); while(s.length%4) s+="="; const bin=atob(s); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
+function makeCode(payload){
+  const p = bytesToB64url(scramble(new TextEncoder().encode(JSON.stringify(payload))));
+  return "QZ2." + p + "." + fnv(QUIZ.id + p);
+}
 function parseCode(code){
-  const m = /^QZ1\.([A-Za-z0-9_-]+)\.([a-z0-9]+)$/.exec(code);
+  const m0 = /^QZ([12])\.([A-Za-z0-9_-]+)\.([a-z0-9]+)$/.exec(code);
+  if(!m0) return null;
+  const ver = m0[1], m = [m0[0], m0[2], m0[3]];
   if(!m) return null;
   if(fnv(QUIZ.id + m[1]) !== m[2]) return {error:"다른 시험의 코드이거나 일부가 잘렸어요"};
   try{
-    const d = JSON.parse(b64urlDecode(m[1]));
+    const d = JSON.parse(ver==="2" ? new TextDecoder().decode(scramble(b64urlToBytes(m[1]))) : b64urlDecode(m[1]));
     if(d.q !== QUIZ.id || !Array.isArray(d.a)) return {error:"다른 시험의 코드예요"};
     return {data:d, id:m[2] + "-" + fnv(m[1])};
   }catch(e){ return {error:"코드를 읽을 수 없어요"}; }
@@ -322,33 +466,65 @@ $("btnSubmit").onclick = ()=>{
   const empty = order().map((i,pos)=>state.answers[i]===""?pos+1:null).filter(Boolean);
   const body = empty.length
     ? `아직 풀지 않은 문항이 있어요: ${empty.join(", ")}번. 그래도 제출할까요? 제출 후에는 답을 고칠 수 없어요.`
-    : "제출하면 답을 고칠 수 없어요. 제출 코드를 만들까요?";
+    : "제출하면 답을 고칠 수 없어요. 제출할까요?";
   confirmDlg(empty.length?"빈 문항이 있어요":"제출할까요?", body, ()=>{
     state.code = makeCode({q:QUIZ.id, c:state.cls, n:state.no, nm:state.name, a:state.answers, t:Date.now()});
-    state.step = "done"; save(); showStep(); window.scrollTo(0,0);
+    state.answers = Array(QUIZ.questions.length).fill("");   // 기기에 답을 남기지 않음
+    state.step = "done"; state.sent = "sending"; save(); showStep(); window.scrollTo(0,0);
+    sendToForm();
   });
 };
 
+/* 구글 설문지로 자동 제출 (반 / 번호 / 이름 / 제출코드) */
+const FORM = {
+  action: "https://docs.google.com/forms/d/e/1FAIpQLSdfirXRVcSkXfr03zsRUoZIpavMHPYDGZK36uwO1zD0DEIrYQ/formResponse",
+  cls: "entry.1547573946", no: "entry.345357488", name: "entry.315108691", code: "entry.190264271"
+};
+let sending = false;
+async function sendToForm(){
+  if(sending || !state.code) return;
+  sending = true; state.sent = "sending"; save(); renderDone();
+  const body = new URLSearchParams();
+  body.append(FORM.cls, `${state.cls}반`);
+  body.append(FORM.no, String(state.no));
+  body.append(FORM.name, state.name);
+  body.append(FORM.code, state.code);
+  const ctrl = ("AbortController" in window) ? new AbortController() : null;
+  const timer = setTimeout(()=>{ try{ ctrl && ctrl.abort(); }catch(e){} }, 15000);
+  try{
+    await fetch(FORM.action, {method:"POST", mode:"no-cors", body, signal: ctrl ? ctrl.signal : undefined});
+    state.sent = "ok";
+  }catch(e){ state.sent = "fail"; }
+  clearTimeout(timer); sending = false; save(); renderDone();
+}
 function renderDone(){
   $("codeBox").textContent = state.code;
-  const box = $("myAnswers"); box.innerHTML="";
-  const p = document.createElement("p"); p.style.margin="0 0 8px";
-  p.textContent = `${state.cls}반 ${state.no}번 ${state.name}`; p.style.fontWeight="700"; box.appendChild(p);
-  order().forEach((i,pos)=>{
-    const q = QUIZ.questions[i], a = state.answers[i];
-    const line = document.createElement("div");
-    line.textContent = `${pos+1}번: ` + (a===""?"(빈칸)": q.type==="mc" ? `${CIRCLED[+a]} ${q.opts[+a]}` : a);
-    box.appendChild(line);
-  });
+  $("whoDone").textContent = `응시자: ${state.cls}반 ${state.no}번 ${state.name}`;
+  const st = state.sent || "sending", box = $("sendBox");
+  box.className = "card send-box " + st;
+  $("btnResend").classList.toggle("hidden", st!=="fail");
+  if(st==="ok"){
+    $("sendIcon").textContent="✅"; $("sendTitle").textContent="제출이 완료됐어요";
+    $("sendMsg").textContent="답안이 선생님께 전송됐어요. 수고했어요! 이제 화면을 닫아도 돼요.";
+    $("backup").open = false;
+  } else if(st==="fail"){
+    $("sendIcon").textContent="⚠️"; $("sendTitle").textContent="자동 제출에 실패했어요";
+    $("sendMsg").textContent="인터넷 연결을 확인하고 [다시 보내기]를 누르세요. 계속 안 되면 아래 ‘직접 제출하는 방법’을 따라 하세요.";
+    $("backup").open = true;
+  } else {
+    $("sendIcon").textContent="⏳"; $("sendTitle").textContent="제출하는 중이에요…";
+    $("sendMsg").textContent="잠시만 기다려 주세요. 화면을 닫지 마세요.";
+  }
 }
+$("btnResend").onclick = ()=> sendToForm();
 $("btnCopy").onclick = async ()=>{
-  try{ await navigator.clipboard.writeText(state.code); $("copyMsg").textContent="복사됐어요! 이제 선생님께 붙여넣어 보내세요."; $("copyMsg").style.color="var(--ok)"; }
+  try{ await navigator.clipboard.writeText(state.code); $("copyMsg").textContent="복사됐어요! 이제 2번 [결과 제출하러 가기]를 누르세요."; $("copyMsg").style.color="var(--ok)"; }
   catch(e){ selectCode(); $("copyMsg").textContent="자동 복사가 막혀 있어요. 선택된 코드를 직접 복사하세요 (Ctrl+C / 길게 누르기)."; $("copyMsg").style.color="var(--warn)"; }
 };
 function selectCode(){ try{ const r=document.createRange(); r.selectNodeContents($("codeBox")); const s=getSelection(); s.removeAllRanges(); s.addRange(r);}catch(e){} }
 $("btnReset").onclick = ()=> confirmDlg("처음으로 돌아갈까요?","지금 화면의 제출 코드가 사라져요. 코드를 이미 보냈는지 확인하세요.", ()=>{
   store.del(DRAFT_KEY);
-  state = {cls:"",no:"",name:"",answers:Array(QUIZ.questions.length).fill(""),step:"info",code:"",order:null};
+  state = {cls:"",no:"",name:"",answers:Array(QUIZ.questions.length).fill(""),step:"info",code:"",order:null,sent:null};
   ["inCls","inNo","inName"].forEach(id=>$(id).value=""); checkInfo(); renderQuestions(); showStep();
 });
 
@@ -361,6 +537,8 @@ function showStep(){
   if(state.step==="done") renderDone();
 }
 renderQuestions(); showStep();
+// 전송 도중 화면이 닫혔다가 다시 열린 경우 한 번 더 보냄 (같은 코드는 선생님 화면에서 한 번만 채점됨)
+if(state.step==="done" && state.sent==="sending") setTimeout(sendToForm, 0);
 
 /* ---------- dialog ---------- */
 let dlgCb = null;

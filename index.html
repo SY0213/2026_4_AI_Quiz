@@ -44,7 +44,7 @@
   .q-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
   .q-num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:900;display:grid;place-items:center;font-size:15px}
   .q.done .q-num{background:var(--accent);color:#fff}
-  .q-text{font-weight:500;font-size:17px;padding-top:3px}
+  .q-text{font-weight:500;font-size:17px;padding-top:3px;white-space:pre-line}
   .q-pts{font-size:12px;color:var(--muted);margin-left:6px;font-weight:400}
   .opts{display:grid;gap:8px;margin-left:44px}
   .opt{display:flex;gap:10px;align-items:center;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;background:#fff;text-align:left;width:100%}
@@ -200,7 +200,7 @@
    시험 문제 (정답은 여기에 없습니다 — 선생님 전용 저장소에만 있어요)
 ------------------------------------------------------------------- */
 const QUIZ = {
-  id: "ai2-ml-models-03-v2",
+  id: "ai2-ml-models-03-v3",
   subject: "중학교 2학년 인공지능 · 3차시",
   title: "분류 · 예측 · 군집 모델 확인 평가",
   questions: [
@@ -211,7 +211,7 @@ const QUIZ = {
     {c:"c1", type:"mc", text:"분류 모델이 새 데이터가 어느 그룹에 속하는지 판단하는 방법으로 옳은 것은?", opts:["새 데이터와 가장 비슷한 범주를 고른다.","새 데이터를 넣어 결과 값(숫자)을 계산한다.","새 데이터와 값이 가까운 것끼리 새로 묶는다.","사람이 직접 범주의 이름을 정해 준다."]},
     {c:"c2", type:"short", text:"분류 모델의 예시입니다. 빈칸에 알맞은 말을 쓰시오. 이메일 → 일반 메일 / (     ) 메일", hint:"괄호에 들어갈 말"},
     {c:"c3", type:"mc", text:"예측 모델의 학습 원리로 옳은 것은?", opts:["정답이 없는 데이터를 모아 비슷한 것끼리 묶는다.","입력값과 결과값이 짝지어진 데이터를 학습해 둘 사이의 관계를 찾는다.","범주마다 특징과 패턴을 찾아 이름을 붙인다.","데이터를 무작위로 골라 결과를 정한다."]},
-    {c:"c4", type:"mc", text:"다음 중 예측 모델을 활용한 예시는?", opts:["사진 속 동물이 고양이인지 개인지 구분한다.","스팸 메일을 걸러 낸다.","기온에 따른 아이스크림 판매량을 예상한다.","뉴스 기사를 비슷한 내용끼리 묶는다."]},
+    {c:"c4", type:"mc", text:"다음 중 예측 모델이 알맞은 것만 고른 것은?\nㄱ. 공부 시간으로 시험 점수(0~100점)를 예상한다.\nㄴ. 내일 비가 올지 안 올지 판단한다.\nㄷ. 집의 넓이와 위치로 집값을 예상한다.\nㄹ. 손글씨 숫자 사진을 보고 0~9 중 어떤 숫자인지 알아낸다.", opts:["ㄱ, ㄷ","ㄱ, ㄹ","ㄴ, ㄷ","ㄱ, ㄷ, ㄹ"]},
     {c:"c5", type:"mc", text:"군집 모델의 학습 원리로 옳은 것은?", opts:["정답(이름표)이 붙은 데이터로 범주마다 특징을 찾는다.","입력값과 결과값의 관계를 찾아 숫자를 계산한다.","정답이 없는 데이터에서 값이 가까운 것끼리 묶는다.","새 데이터와 가장 비슷한 범주를 고른다."]},
     {c:"c5", type:"short", text:"빈칸에 알맞은 말을 쓰시오. 군집 모델이 만든 묶음의 이름은 (     )이 나중에 붙인다.", hint:"괄호에 들어갈 말"},
     {c:"c6", type:"mc", text:"다음 중 군집 모델을 활용한 예시와 그 설명이 옳은 것은?", opts:["뉴스 기사를 분석해, 정답 없이 비슷한 내용끼리 묶는다.","지난 기온 기록으로 내일 기온이 몇 도일지 계산한다.","이름표가 붙은 메일로 배워 새 메일이 스팸인지 판단한다.","사진을 보고 ‘고양이’ 또는 ‘개’라는 이름을 붙인다."]},

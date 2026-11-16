@@ -164,6 +164,14 @@
   details#backup>summary{cursor:pointer;font-weight:700;color:var(--muted)}
   details#backup[open]>summary{color:var(--ink)}
   details#backup .card{border-color:#ebe7dd;box-shadow:none}
+  .dup-box{border-color:#efc9b5;background:#fffaf6}
+  #dupTbl tr.first td{background:#eef7f1}
+  .info-row{align-items:flex-start}
+  .f-sm{max-width:120px}
+  select{border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;background:#fff;outline:none;width:100%;font:inherit;color:inherit}
+  select:focus{border-color:var(--accent)}
+  input.bad,select.bad{border-color:var(--bad);background:#fff7f6}
+  .ferr{font-size:12px;color:var(--bad);min-height:16px;line-height:1.35}
   .hidden{display:none !important}
 </style>
 </head>
@@ -182,11 +190,15 @@
     <!-- step 1: info -->
     <section id="stepInfo" class="card">
       <h2>응시자 정보</h2>
-      <p class="muted small" style="margin-top:-6px">반, 번호, 이름을 정확히 입력하세요. 선생님이 성적을 정리할 때 사용합니다.</p>
-      <div class="row" style="margin:14px 0 18px">
-        <div class="field" style="max-width:110px"><label for="inCls">반</label><input id="inCls" type="number" min="1" max="30" inputmode="numeric" placeholder="예: 3"></div>
-        <div class="field" style="max-width:110px"><label for="inNo">번호</label><input id="inNo" type="number" min="1" max="60" inputmode="numeric" placeholder="예: 12"></div>
-        <div class="field"><label for="inName">이름</label><input id="inName" type="text" maxlength="20" placeholder="홍길동"></div>
+      <p class="muted small" style="margin-top:-6px">학년, 반, 번호, 이름을 정확히 입력하세요. 선생님이 성적을 정리할 때 사용합니다.</p>
+      <div class="row info-row" style="margin:14px 0 18px">
+        <div class="field f-sm"><label for="inGrade">학년</label><input id="inGrade" type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="2"><span class="ferr" id="errGrade"></span></div>
+        <div class="field f-sm"><label for="inCls">반</label>
+          <select id="inCls"><option value="">선택</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+          </select><span class="ferr" id="errCls"></span></div>
+        <div class="field f-sm"><label for="inNo">번호</label><input id="inNo" type="text" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="예: 12"><span class="ferr" id="errNo"></span></div>
+        <div class="field"><label for="inName">이름</label><input id="inName" type="text" maxlength="20" autocomplete="off" placeholder="홍길동 (띄어쓰기 없이)"><span class="ferr" id="errName"></span></div>
       </div>
       <div class="notice warn small" style="margin-bottom:16px" id="quizInfoLine"></div>
       <button class="btn" id="btnStart" disabled>시험 시작</button>
@@ -301,9 +313,6 @@
 
       </details>
 
-      <div style="text-align:right;margin-top:16px">
-        <button class="btn plain" id="btnReset">처음부터 다시 (다른 학생)</button>
-      </div>
     </section>
   </div>
 
@@ -397,7 +406,7 @@ function parseCode(code){
 }
 
 /* ======================= STUDENT ======================= */
-let state = store.get(DRAFT_KEY) || {cls:"",no:"",name:"",answers:Array(QUIZ.questions.length).fill(""),step:"info",code:""};
+let state = store.get(DRAFT_KEY) || {grade:"",cls:"",no:"",name:"",answers:Array(QUIZ.questions.length).fill(""),step:"info",code:""};
 if(!Array.isArray(state.answers) || state.answers.length !== QUIZ.questions.length) state.answers = Array(QUIZ.questions.length).fill("");
 /* 문항 순서: 학생마다 무작위로 섞고, 새로고침해도 같은 순서가 유지되도록 저장. 답은 원래 문항 번호 자리에 저장되어 채점에는 영향 없음 */
 function shuffledOrder(){ const o=QUIZ.questions.map((_,i)=>i); for(let i=o.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [o[i],o[j]]=[o[j],o[i]]; } return o; }
@@ -412,14 +421,40 @@ $("quizInfoLine").textContent = `총 ${QUIZ.questions.length}문항 (객관식 $
 
 function save(){ store.set(DRAFT_KEY, state); }
 
-["inCls","inNo","inName"].forEach(id=>{
-  const el=$(id); const key={inCls:"cls",inNo:"no",inName:"name"}[id];
-  el.value = state[key] || "";
-  el.addEventListener("input",()=>{ state[key]=el.value.trim(); save(); checkInfo(); });
+/* 응시자 정보 입력 제한: 학년은 2만, 반은 1~10반, 번호는 1~15·21~40, 이름은 빈칸 없이 */
+const VALID = {
+  grade: v => v === "2",
+  cls:   v => /^\d{1,2}$/.test(v) && +v >= 1 && +v <= 10,
+  no:    v => /^\d{1,2}$/.test(v) && ((+v >= 1 && +v <= 15) || (+v >= 21 && +v <= 40)),
+  name:  v => v.length > 0 && !/\s/.test(v)
+};
+const ERRMSG = { grade:"학년은 2만 입력할 수 있어요.", cls:"반을 선택하세요.", no:"번호는 1~15번, 21~40번만 입력할 수 있어요.", name:"이름을 입력하세요." };
+const FIELDS = [["inGrade","grade","errGrade"],["inCls","cls","errCls"],["inNo","no","errNo"],["inName","name","errName"]];
+const touched = {};
+function showErr(key, errId, msg){ const e=$(errId); e.textContent = msg||""; $(FIELDS.find(f=>f[1]===key)[0]).classList.toggle("bad", !!msg); }
+FIELDS.forEach(([id,key,errId])=>{
+  const el=$(id);
+  if(state[key] && (key!=="no" || VALID.no(state[key]))) el.value = state[key];
+  const handler = ()=>{
+    let v = el.value;
+    let note = "";
+    if(key==="grade" || key==="no"){ const d=v.replace(/\D/g,""); if(d!==v) note = "숫자만 입력할 수 있어요."; v=d; }
+    if(key==="grade" && v.length>1) v=v.slice(-1);
+    if(key==="no" && v.length>1 && v[0]==="0") v=String(+v);
+    if(key==="name"){ const n=v.replace(/\s/g,""); if(n!==v) note="이름에는 빈칸을 넣을 수 없어요."; v=n; }
+    if(el.value!==v) el.value=v;
+    touched[key]=true;
+    state[key]=v; save();
+    showErr(key, errId, note || (v && !VALID[key](v) ? ERRMSG[key] : (!v && touched[key] && key!=="name" ? "" : "")));
+    checkInfo();
+  };
+  el.addEventListener(el.tagName==="SELECT" ? "change" : "input", handler);
+  el.addEventListener("blur", ()=>{ if(!VALID[key](state[key]||"")) showErr(key, errId, ERRMSG[key]); });
 });
-function checkInfo(){ $("btnStart").disabled = !(state.cls && state.no && state.name); }
+function infoValid(){ return FIELDS.every(([,key])=>VALID[key](state[key]||"")); }
+function checkInfo(){ $("btnStart").disabled = !infoValid(); }
 checkInfo();
-$("btnStart").onclick = ()=>{ if(!validOrder(state.order)) state.order = shuffledOrder(); state.step="quiz"; save(); renderQuestions(); showStep(); window.scrollTo(0,0); };
+$("btnStart").onclick = ()=>{ if(!infoValid()) return; if(!validOrder(state.order)) state.order = shuffledOrder(); state.step="quiz"; save(); renderQuestions(); showStep(); window.scrollTo(0,0); };
 
 function renderQuestions(){
   const box = $("qList"); box.innerHTML = "";
@@ -468,7 +503,7 @@ $("btnSubmit").onclick = ()=>{
     ? `아직 풀지 않은 문항이 있어요: ${empty.join(", ")}번. 그래도 제출할까요? 제출 후에는 답을 고칠 수 없어요.`
     : "제출하면 답을 고칠 수 없어요. 제출할까요?";
   confirmDlg(empty.length?"빈 문항이 있어요":"제출할까요?", body, ()=>{
-    state.code = makeCode({q:QUIZ.id, c:state.cls, n:state.no, nm:state.name, a:state.answers, t:Date.now()});
+    state.code = makeCode({q:QUIZ.id, g:state.grade, c:state.cls, n:state.no, nm:state.name, a:state.answers, t:Date.now()});
     state.answers = Array(QUIZ.questions.length).fill("");   // 기기에 답을 남기지 않음
     state.step = "done"; state.sent = "sending"; save(); showStep(); window.scrollTo(0,0);
     sendToForm();
@@ -499,7 +534,7 @@ async function sendToForm(){
 }
 function renderDone(){
   $("codeBox").textContent = state.code;
-  $("whoDone").textContent = `응시자: ${state.cls}반 ${state.no}번 ${state.name}`;
+  $("whoDone").textContent = `응시자: ${state.grade}학년 ${state.cls}반 ${state.no}번 ${state.name}`;
   const st = state.sent || "sending", box = $("sendBox");
   box.className = "card send-box " + st;
   $("btnResend").classList.toggle("hidden", st!=="fail");
@@ -522,18 +557,14 @@ $("btnCopy").onclick = async ()=>{
   catch(e){ selectCode(); $("copyMsg").textContent="자동 복사가 막혀 있어요. 선택된 코드를 직접 복사하세요 (Ctrl+C / 길게 누르기)."; $("copyMsg").style.color="var(--warn)"; }
 };
 function selectCode(){ try{ const r=document.createRange(); r.selectNodeContents($("codeBox")); const s=getSelection(); s.removeAllRanges(); s.addRange(r);}catch(e){} }
-$("btnReset").onclick = ()=> confirmDlg("처음으로 돌아갈까요?","지금 화면의 제출 코드가 사라져요. 코드를 이미 보냈는지 확인하세요.", ()=>{
-  store.del(DRAFT_KEY);
-  state = {cls:"",no:"",name:"",answers:Array(QUIZ.questions.length).fill(""),step:"info",code:"",order:null,sent:null};
-  ["inCls","inNo","inName"].forEach(id=>$(id).value=""); checkInfo(); renderQuestions(); showStep();
-});
+
 
 function showStep(){
   $("stepInfo").classList.toggle("hidden", state.step!=="info");
   $("stepQuiz").classList.toggle("hidden", state.step!=="quiz");
   $("stepDone").classList.toggle("hidden", state.step!=="done");
   $("footer").classList.toggle("hidden", state.step!=="quiz");
-  if(state.step==="quiz"){ $("whoLine").textContent = `응시자: ${state.cls}반 ${state.no}번 ${state.name}`; updateProgress(); }
+  if(state.step==="quiz"){ $("whoLine").textContent = `응시자: ${state.grade}학년 ${state.cls}반 ${state.no}번 ${state.name}`; updateProgress(); }
   if(state.step==="done") renderDone();
 }
 renderQuestions(); showStep();

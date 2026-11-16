@@ -413,6 +413,13 @@ function shuffledOrder(){ const o=QUIZ.questions.map((_,i)=>i); for(let i=o.leng
 function validOrder(o){ return Array.isArray(o) && o.length===QUIZ.questions.length && [...o].sort((a,b)=>a-b).every((v,i)=>v===i); }
 if(!validOrder(state.order)) state.order = (state.step==="info") ? null : shuffledOrder();
 const order = () => validOrder(state.order) ? state.order : QUIZ.questions.map((_,i)=>i);
+/* 보기 순서: 객관식마다 학생별로 섞음. 답은 원래 보기 번호로 저장되어 채점에는 영향 없음 */
+function shufflePerm(n){ const o=[...Array(n).keys()]; for(let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [o[i],o[j]]=[o[j],o[i]]; } return o; }
+function validPerm(p,n){ return Array.isArray(p) && p.length===n && [...p].sort((a,b)=>a-b).every((v,k)=>v===k); }
+function makeOptOrder(){ const m={}; QUIZ.questions.forEach((q,i)=>{ if(q.type==="mc") m[i]=shufflePerm(q.opts.length); }); return m; }
+function optOrderValid(m){ return m && typeof m==="object" && QUIZ.questions.every((q,i)=> q.type!=="mc" || validPerm(m[i], q.opts.length)); }
+if(!optOrderValid(state.optOrder)) state.optOrder = (state.step==="info") ? null : makeOptOrder();
+const optPerm = i => (state.optOrder && validPerm(state.optOrder[i], QUIZ.questions[i].opts.length)) ? state.optOrder[i] : [...QUIZ.questions[i].opts.keys()];
 
 $("quizSubject").textContent = QUIZ.subject;
 $("quizTitle").textContent = QUIZ.title;
@@ -454,7 +461,7 @@ FIELDS.forEach(([id,key,errId])=>{
 function infoValid(){ return FIELDS.every(([,key])=>VALID[key](state[key]||"")); }
 function checkInfo(){ $("btnStart").disabled = !infoValid(); }
 checkInfo();
-$("btnStart").onclick = ()=>{ if(!infoValid()) return; if(!validOrder(state.order)) state.order = shuffledOrder(); state.step="quiz"; save(); renderQuestions(); showStep(); window.scrollTo(0,0); };
+$("btnStart").onclick = ()=>{ if(!infoValid()) return; if(!validOrder(state.order)) state.order = shuffledOrder(); if(!optOrderValid(state.optOrder)) state.optOrder = makeOptOrder(); state.step="quiz"; save(); renderQuestions(); showStep(); window.scrollTo(0,0); };
 
 function renderQuestions(){
   const box = $("qList"); box.innerHTML = "";
@@ -467,10 +474,10 @@ function renderQuestions(){
     head.append(num,tx); c.appendChild(head);
     if(q.type==="mc"){
       const opts = document.createElement("div"); opts.className="opts";
-      q.opts.forEach((o,j)=>{
-        const b = document.createElement("button"); b.type="button"; b.className="opt";
-        const mk = document.createElement("span"); mk.className="mark"; mk.textContent = j+1;
-        const t = document.createElement("span"); t.textContent = o;
+      optPerm(i).forEach((j,pos)=>{
+        const b = document.createElement("button"); b.type="button"; b.className="opt"; b.dataset.j = String(j);
+        const mk = document.createElement("span"); mk.className="mark"; mk.textContent = pos+1;
+        const t = document.createElement("span"); t.textContent = q.opts[j];
         b.append(mk,t);
         b.onclick = ()=>{ state.answers[i] = String(j); save(); paintQ(i); updateProgress(); };
         opts.appendChild(b);
@@ -489,7 +496,7 @@ function renderQuestions(){
 function paintQ(i){
   const c = $("q"+i); if(!c) return;
   c.classList.toggle("done", state.answers[i]!=="");
-  c.querySelectorAll(".opt").forEach((b,j)=> b.classList.toggle("sel", state.answers[i]===String(j)));
+  c.querySelectorAll(".opt").forEach(b=> b.classList.toggle("sel", state.answers[i]===b.dataset.j));
 }
 function updateProgress(){
   const n = state.answers.filter(a=>a!=="").length, N = QUIZ.questions.length;

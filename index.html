@@ -187,6 +187,7 @@
       </div>
     </header>
 
+    <div class="notice ok hidden" id="resetDone" style="margin-bottom:14px">✔ 이 기기의 응시 기록을 지웠어요. 다음 학생이 시험을 볼 수 있어요.</div>
     <!-- step 1: info -->
     <section id="stepInfo" class="card">
       <h2>응시자 정보</h2>
@@ -586,6 +587,26 @@ function confirmDlg(title, body, cb, yesLabel){
 }
 $("dlgNo").onclick = ()=>{ $("dlg").classList.remove("on"); dlgCb=null; };
 $("dlgYes").onclick = ()=>{ $("dlg").classList.remove("on"); const f=dlgCb; dlgCb=null; f && f(); };
+
+/* 공용 기기 초기화: 주소 끝에 #reset 을 붙여 열면 이 기기의 응시 기록을 지울 수 있음 (여러 반이 같은 컴퓨터를 쓸 때) */
+function resetDevice(){
+  store.del(DRAFT_KEY);
+  state = {grade:"",cls:"",no:"",name:"",answers:Array(QUIZ.questions.length).fill(""),step:"info",code:"",order:null,optOrder:null,sent:null};
+  FIELDS.forEach(([id,key,errId])=>{ $(id).value=""; showErr(key,errId,""); });
+  checkInfo(); renderQuestions(); showStep(); window.scrollTo(0,0);
+}
+function clearHash(){ try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){ try{ location.hash=""; }catch(e2){} } }
+function checkResetHash(){
+  if(location.hash !== "#reset") return;
+  clearHash();
+  const who = state.name ? `${state.grade||""}${state.grade?"학년 ":""}${state.cls}반 ${state.no}번 ${state.name} 학생의 기록이 남아 있어요. ` : "남아 있는 응시 기록이 없어요. ";
+  confirmDlg("이 기기의 응시 기록을 지울까요?", who + "다음 학생이 새로 시험을 볼 수 있게 이 기기에 남은 기록을 지웁니다. 이미 선생님께 제출된 답안은 지워지지 않아요.", ()=>{
+    resetDevice();
+    const m = $("resetDone"); if(m){ m.classList.remove("hidden"); setTimeout(()=>m.classList.add("hidden"), 4000); }
+  }, "기록 지우기");
+}
+window.addEventListener("hashchange", checkResetHash);
+checkResetHash();
 
 </script>
 </body>

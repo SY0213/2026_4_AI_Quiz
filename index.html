@@ -255,6 +255,11 @@ function parseCode(code){
 /* ======================= STUDENT ======================= */
 let state = store.get(DRAFT_KEY) || {cls:"",no:"",name:"",answers:Array(QUIZ.questions.length).fill(""),step:"info",code:""};
 if(!Array.isArray(state.answers) || state.answers.length !== QUIZ.questions.length) state.answers = Array(QUIZ.questions.length).fill("");
+/* 문항 순서: 학생마다 무작위로 섞고, 새로고침해도 같은 순서가 유지되도록 저장. 답은 원래 문항 번호 자리에 저장되어 채점에는 영향 없음 */
+function shuffledOrder(){ const o=QUIZ.questions.map((_,i)=>i); for(let i=o.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [o[i],o[j]]=[o[j],o[i]]; } return o; }
+function validOrder(o){ return Array.isArray(o) && o.length===QUIZ.questions.length && [...o].sort((a,b)=>a-b).every((v,i)=>v===i); }
+if(!validOrder(state.order)) state.order = (state.step==="info") ? null : shuffledOrder();
+const order = () => validOrder(state.order) ? state.order : QUIZ.questions.map((_,i)=>i);
 
 $("quizSubject").textContent = QUIZ.subject;
 $("quizTitle").textContent = QUIZ.title;
@@ -270,14 +275,15 @@ function save(){ store.set(DRAFT_KEY, state); }
 });
 function checkInfo(){ $("btnStart").disabled = !(state.cls && state.no && state.name); }
 checkInfo();
-$("btnStart").onclick = ()=>{ state.step="quiz"; save(); showStep(); window.scrollTo(0,0); };
+$("btnStart").onclick = ()=>{ if(!validOrder(state.order)) state.order = shuffledOrder(); state.step="quiz"; save(); renderQuestions(); showStep(); window.scrollTo(0,0); };
 
 function renderQuestions(){
   const box = $("qList"); box.innerHTML = "";
-  QUIZ.questions.forEach((q,i)=>{
+  order().forEach((i,pos)=>{
+    const q = QUIZ.questions[i];
     const c = document.createElement("div"); c.className = "card q"; c.id = "q"+i;
     const head = document.createElement("div"); head.className="q-head";
-    const num = document.createElement("div"); num.className="q-num"; num.textContent = i+1;
+    const num = document.createElement("div"); num.className="q-num"; num.textContent = pos+1;
     const tx = document.createElement("div"); tx.className="q-text"; tx.textContent = q.text;
     head.append(num,tx); c.appendChild(head);
     if(q.type==="mc"){
@@ -313,7 +319,7 @@ function updateProgress(){
 }
 
 $("btnSubmit").onclick = ()=>{
-  const empty = state.answers.map((a,i)=>a===""?i+1:null).filter(Boolean);
+  const empty = order().map((i,pos)=>state.answers[i]===""?pos+1:null).filter(Boolean);
   const body = empty.length
     ? `아직 풀지 않은 문항이 있어요: ${empty.join(", ")}번. 그래도 제출할까요? 제출 후에는 답을 고칠 수 없어요.`
     : "제출하면 답을 고칠 수 없어요. 제출 코드를 만들까요?";
@@ -328,10 +334,10 @@ function renderDone(){
   const box = $("myAnswers"); box.innerHTML="";
   const p = document.createElement("p"); p.style.margin="0 0 8px";
   p.textContent = `${state.cls}반 ${state.no}번 ${state.name}`; p.style.fontWeight="700"; box.appendChild(p);
-  QUIZ.questions.forEach((q,i)=>{
-    const a = state.answers[i];
+  order().forEach((i,pos)=>{
+    const q = QUIZ.questions[i], a = state.answers[i];
     const line = document.createElement("div");
-    line.textContent = `${i+1}번: ` + (a===""?"(빈칸)": q.type==="mc" ? `${CIRCLED[+a]} ${q.opts[+a]}` : a);
+    line.textContent = `${pos+1}번: ` + (a===""?"(빈칸)": q.type==="mc" ? `${CIRCLED[+a]} ${q.opts[+a]}` : a);
     box.appendChild(line);
   });
 }
@@ -342,7 +348,7 @@ $("btnCopy").onclick = async ()=>{
 function selectCode(){ try{ const r=document.createRange(); r.selectNodeContents($("codeBox")); const s=getSelection(); s.removeAllRanges(); s.addRange(r);}catch(e){} }
 $("btnReset").onclick = ()=> confirmDlg("처음으로 돌아갈까요?","지금 화면의 제출 코드가 사라져요. 코드를 이미 보냈는지 확인하세요.", ()=>{
   store.del(DRAFT_KEY);
-  state = {cls:"",no:"",name:"",answers:Array(QUIZ.questions.length).fill(""),step:"info",code:""};
+  state = {cls:"",no:"",name:"",answers:Array(QUIZ.questions.length).fill(""),step:"info",code:"",order:null};
   ["inCls","inNo","inName"].forEach(id=>$(id).value=""); checkInfo(); renderQuestions(); showStep();
 });
 
